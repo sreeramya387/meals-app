@@ -46,31 +46,27 @@ export async function POST(request: NextRequest) {
     const weekStart = startOfWeek(new Date(date), { weekStartsOn: 1 })
     const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
-    const existingPlans = await db
-  .select()
-  .from(mealPlans)
-  .where(
-    and(
-      eq(mealPlans.userId, user.id),
-      eq(mealPlans.weekStartDate, weekStartStr)
-    )
-  )
-  .limit(1)
+    let [mealPlan] = await db
+      .select()
+      .from(mealPlans)
+      .where(
+        and(
+          eq(mealPlans.userId, user.id),
+          eq(mealPlans.weekStartDate, weekStartStr)
+        )
+      )
+      .limit(1)
 
-let mealPlan = existingPlans[0]
-
-if (!mealPlan) {
-  console.log('Creating new meal plan for week:', weekStartStr)
-  const inserted = await db
-    .insert(mealPlans)
-    .values({
-      userId: user.id,
-      weekStartDate: weekStartStr,
-      name: `Week of ${format(weekStart, 'MMM dd, yyyy')}`,
-    })
-    .returning()
-  mealPlan = inserted[0]
-}
+    if (!mealPlan) {
+      [mealPlan] = await db
+        .insert(mealPlans)
+        .values({
+          userId: user.id,
+          weekStartDate: weekStartStr,
+          name: `Week of ${format(weekStart, 'MMM dd, yyyy')}`,
+        })
+        .returning()
+    }
 
     // Check if slot is already occupied
     const [existingPlannedMeal] = await db
