@@ -1,14 +1,15 @@
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
 import { sessions, users } from '@/lib/db/schema'
-import { eq, gt } from 'drizzle-orm'
+import { eq, lt } from 'drizzle-orm'
+import { SignOptions } from 'jsonwebtoken'
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is not set')
 }
 
 const JWT_SECRET = process.env.JWT_SECRET
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn']
 
 interface JWTPayload {
   userId: string
@@ -94,5 +95,4 @@ export async function getUserFromSession(token: string) {
 
 // Cleanup expired sessions (should be run periodically)
 export async function cleanupExpiredSessions(): Promise<void> {
-  await db.delete(sessions).where(gt(new Date(), sessions.expiresAt))
-}
+await db.delete(sessions).where(lt(sessions.expiresAt, new Date()))}
