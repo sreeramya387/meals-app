@@ -32,32 +32,34 @@ export async function GET(request: NextRequest) {
     console.log('Looking for meal plan with weekStartDate:', weekStartStr)
 
     // Find or create meal plan for this week
-    let [mealPlan] = await db
-      .select()
-      .from(mealPlans)
-      .where(
-        and(
-          eq(mealPlans.userId, user.id),
-          eq(mealPlans.weekStartDate, weekStartStr)
-        )
-      )
-      .limit(1)
+   const existingPlans = await db
+  .select()
+  .from(mealPlans)
+  .where(
+    and(
+      eq(mealPlans.userId, user.id),
+      eq(mealPlans.weekStartDate, weekStartStr)
+    )
+  )
+  .limit(1)
 
-    if (!mealPlan) {
-      // Create new meal plan for this week
-      console.log('Creating new meal plan for week:', weekStartStr)
-      [mealPlan] = await db
-        .insert(mealPlans)
-        .values({
-          userId: user.id,
-          weekStartDate: weekStartStr,
-          name: `Week of ${format(weekStart, 'MMM dd, yyyy')}`,
-        })
-        .returning()
-      console.log('Created meal plan:', mealPlan)
-    } else {
-      console.log('Found existing meal plan:', mealPlan.id, 'for week:', mealPlan.weekStartDate)
-    }
+let mealPlan = existingPlans[0]
+
+if (!mealPlan) {
+  console.log('Creating new meal plan for week:', weekStartStr)
+  const inserted = await db
+    .insert(mealPlans)
+    .values({
+      userId: user.id,
+      weekStartDate: weekStartStr,
+      name: `Week of ${format(weekStartDate, 'MMM dd, yyyy')}`,  // ✅ fixed: weekStart → weekStartDate
+    })
+    .returning()
+  mealPlan = inserted[0]
+  console.log('Created meal plan:', mealPlan)
+} else {
+  console.log('Found existing meal plan:', mealPlan.id, 'for week:', mealPlan.weekStartDate)
+}
 
     // Get all planned meals for this week
     const plannedMealsData = await db
