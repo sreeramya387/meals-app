@@ -4,11 +4,7 @@ import { sessions, users } from '@/lib/db/schema'
 import { eq, lt } from 'drizzle-orm'
 import { SignOptions } from 'jsonwebtoken'
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not set')
-}
-
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET!
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn']
 
 interface JWTPayload {
