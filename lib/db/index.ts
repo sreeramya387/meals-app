@@ -2,12 +2,12 @@ import { drizzle } from 'drizzle-orm/neon-serverless'
 import { Pool } from '@neondatabase/serverless'
 import * as schema from './schema'
 
-const createDb = () => {
-  const url = process.env.DATABASE_URL!
-  const pool = new Pool({ connectionString: url })
-  return drizzle(pool, { schema })
-}
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
 
-export const db = createDb()
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL 
+})
+export const db = drizzle(pool, { schema })
 
 export type DbClient = typeof db
+
