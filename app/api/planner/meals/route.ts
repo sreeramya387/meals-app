@@ -72,28 +72,6 @@ if (!mealPlan) {
   mealPlan = inserted[0]
 }
 
-    /*let [mealPlan] = await db
-      .select()
-      .from(mealPlans)
-      .where(
-        and(
-          eq(mealPlans.userId, user.id),
-          eq(mealPlans.weekStartDate, weekStartStr)
-        )
-      )
-      .limit(1)
-
-    if (!mealPlan) {
-      [mealPlan] = await db
-        .insert(mealPlans)
-        .values({
-          userId: user.id,
-          weekStartDate: weekStartStr,
-          name: `Week of ${format(weekStart, 'MMM dd, yyyy')}`,
-        })
-        .returning()
-    }*/
-
     // Check if slot is already occupied
     const [existingPlannedMeal] = await db
       .select()
